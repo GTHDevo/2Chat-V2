@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> 2 Chat Hub</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: white;
+}
+
+/* GLASS */
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* LAYOUT */
+.container {
+  display: flex;
+  height: 100vh;
+  padding: 10px;
+  gap: 10px;
+}
+
+/* LEFT PANEL */
+.left {
+  width: 260px;
+  padding: 10px;
+}
+
+.channel {
+  padding: 12px;
+  margin: 6px 0;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.channel:hover {
+  background: rgba(255,36,0,0.3);
+  box-shadow: 0 0 10px #ff2400;
+}
+
+/* RIGHT */
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* TOP */
+.top {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #ff2400;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ff2400;
+}
+
+/* LIVE BADGE */
+.live {
+  padding: 5px 10px;
+  background: red;
+  border-radius: 20px;
+  font-size: 12px;
+  display: inline-block;
+  box-shadow: 0 0 10px red;
+}
+
+/* VIDEO */
+.video {
+  height: 40%;
+  overflow: hidden;
+}
+
+.video iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 16px;
+}
+
+/* CHAT */
+.chats {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+}
+
+.chat {
+  flex: 1;
+  overflow: hidden;
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* MOBILE SWIPE */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+  }
+
+  .chats {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .chat {
+    min-width: 100%;
+    transition: transform 0.3s;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="left glass">
+    <h3>🔥 Kanallar</h3>
+    <div id="list"></div>
+  </div>
+
+  <div class="right">
+
+    <div class="top glass">
+      <input id="yt" placeholder="YouTube link">
+      <input id="kick" placeholder="Kick kanal">
+      <button onclick="start()">Aç</button>
+      <span id="liveBadge" class="live">OFFLINE</span>
+    </div>
+
+    <div class="video glass">
+      <iframe id="videoFrame"></iframe>
+    </div>
+
+    <div class="chats" id="chatContainer">
+      <div class="chat glass"><iframe id="ytFrame"></iframe></div>
+      <div class="chat glass"><iframe id="kickFrame"></iframe></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+let currentYT = "";
+let currentKick = "";
+let currentIndex = 0;
+
+/* CHANNELS */
+const channels = [
+  { name: "MervanT", yt: "Xp5KwxKl7cU", kick: "mervant0" }
+];
+
+const list = document.getElementById("list");
+
+channels.forEach(c => {
+  let div = document.createElement("div");
+  div.className = "channel glass";
+  div.innerText = c.name;
+  div.onclick = () => openChannel(c);
+  list.appendChild(div);
+});
+
+/* OPEN CHANNEL */
+function openChannel(c) {
+  currentYT = c.yt;
+  currentKick = c.kick;
+  loadAll();
+}
+
+/* LOAD */
+function loadAll() {
+  document.getElementById("ytFrame").src =
+    `https://www.youtube.com/live_chat?v=${currentYT}&embed_domain=${location.hostname}`;
+
+  document.getElementById("kickFrame").src =
+    `https://kick.com/popout/${currentKick}/chat`;
+
+  document.getElementById("videoFrame").src =
+    `https://www.youtube.com/embed/${currentYT}`;
+
+  checkLive();
+}
+
+/* LIVE CHECK (basic) */
+function checkLive() {
+  const badge = document.getElementById("liveBadge");
+
+  if (currentYT) {
+    badge.innerText = "🔴 LIVE";
+    badge.style.background = "red";
+  } else {
+    badge.innerText = "OFFLINE";
+    badge.style.background = "gray";
+  }
+}
+
+/* INPUT */
+function start() {
+  let yt = document.getElementById("yt").value.trim();
+  let kick = document.getElementById("kick").value.trim();
+
+  let ytID = extractID(yt);
+  if (!ytID) return alert("YT ID yok");
+
+  currentYT = ytID;
+  currentKick = kick;
+
+  loadAll();
+}
+
+/* SWIPE */
+let startX = 0;
+
+document.getElementById("chatContainer").addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+document.getElementById("chatContainer").addEventListener("touchend", e => {
+  let endX = e.changedTouches[0].clientX;
+
+  if (startX - endX > 50) currentIndex++;
+  if (endX - startX > 50) currentIndex--;
+
+  currentIndex = Math.max(0, Math.min(1, currentIndex));
+
+  document.querySelectorAll(".chat").forEach((el, i) => {
+    el.style.transform = `translateX(-${currentIndex * 100}%)`;
+  });
+});
+
+/* YT ID */
+function extractID(url) {
+  let m = url.match(/v=([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+
+  m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (m) return m[1];
+
+  return null;
+}
+</script>
+
+</body>
+</html>
