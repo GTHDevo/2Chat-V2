@@ -2,149 +2,76 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> 2 Chat Hub</title>
+<title>Chat Hub 🔥</title>
 
 <style>
-* { box-sizing: border-box; }
-
 body {
   margin: 0;
   font-family: Arial;
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  background: #0f0f0f;
   color: white;
 }
 
-/* GLASS */
-.glass {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-/* LAYOUT */
 .container {
   display: flex;
   height: 100vh;
-  padding: 10px;
-  gap: 10px;
 }
 
 /* LEFT PANEL */
 .left {
-  width: 260px;
+  width: 25%;
+  background: #151515;
   padding: 10px;
+  overflow-y: auto;
 }
 
 .channel {
-  padding: 12px;
-  margin: 6px 0;
+  padding: 10px;
+  margin: 5px 0;
+  background: #222;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.channel:hover {
-  background: rgba(255,36,0,0.3);
-  box-shadow: 0 0 10px #ff2400;
-}
-
-/* RIGHT */
+/* RIGHT PANEL */
 .right {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-/* TOP */
 .top {
   display: flex;
-  gap: 8px;
+  gap: 5px;
   padding: 10px;
+  background: #1a1a1a;
 }
 
 input {
   flex: 1;
-  padding: 10px;
+  padding: 8px;
   border: none;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.1);
-  color: white;
+  border-radius: 6px;
 }
 
 button {
-  padding: 10px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 10px;
-  background: #ff2400;
+  border-radius: 6px;
+  background: #ff0055;
   color: white;
   cursor: pointer;
-  box-shadow: 0 0 10px #ff2400;
 }
 
-/* LIVE BADGE */
-.live {
-  padding: 5px 10px;
-  background: red;
-  border-radius: 20px;
-  font-size: 12px;
-  display: inline-block;
-  box-shadow: 0 0 10px red;
-}
-
-/* VIDEO */
-.video {
-  height: 40%;
-  overflow: hidden;
-}
-
-.video iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  border-radius: 16px;
-}
-
-/* CHAT */
 .chats {
   flex: 1;
   display: flex;
-  gap: 10px;
-}
-
-.chat {
-  flex: 1;
-  overflow: hidden;
+  flex-direction: column;
 }
 
 iframe {
-  width: 100%;
-  height: 100%;
+  flex: 1;
   border: none;
-}
-
-/* MOBILE SWIPE */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .left {
-    width: 100%;
-    display: flex;
-    overflow-x: auto;
-  }
-
-  .chats {
-    overflow: hidden;
-    position: relative;
-  }
-
-  .chat {
-    min-width: 100%;
-    transition: transform 0.3s;
-  }
 }
 </style>
 </head>
@@ -153,27 +80,22 @@ iframe {
 
 <div class="container">
 
-  <div class="left glass">
+  <div class="left">
     <h3>🔥 Kanallar</h3>
     <div id="list"></div>
   </div>
 
   <div class="right">
 
-    <div class="top glass">
-      <input id="yt" placeholder="YouTube link">
-      <input id="kick" placeholder="Kick kanal">
+    <div class="top">
+      <input id="yt" placeholder="YouTube @kanal veya video link">
+      <input id="kick" placeholder="Kick kanal adı">
       <button onclick="start()">Aç</button>
-      <span id="liveBadge" class="live">OFFLINE</span>
     </div>
 
-    <div class="video glass">
-      <iframe id="videoFrame"></iframe>
-    </div>
-
-    <div class="chats" id="chatContainer">
-      <div class="chat glass"><iframe id="ytFrame"></iframe></div>
-      <div class="chat glass"><iframe id="kickFrame"></iframe></div>
+    <div class="chats">
+      <iframe id="ytFrame"></iframe>
+      <iframe id="kickFrame"></iframe>
     </div>
 
   </div>
@@ -181,94 +103,102 @@ iframe {
 </div>
 
 <script>
-let currentYT = "";
-let currentKick = "";
-let currentIndex = 0;
 
-/* CHANNELS */
+/* 🔥 KANALLAR */
 const channels = [
-  { name: "MervanT", yt: "Xp5KwxKl7cU", kick: "mervant0" }
+  {
+    name: "MervanT",
+    channelId: "UCtt2fF2vhAZA4AjekpuuxDg",
+    kick: "mervant0"
+  }
 ];
 
+/* LEFT PANEL */
 const list = document.getElementById("list");
 
 channels.forEach(c => {
   let div = document.createElement("div");
-  div.className = "channel glass";
+  div.className = "channel";
   div.innerText = c.name;
+
   div.onclick = () => openChannel(c);
+
   list.appendChild(div);
 });
 
-/* OPEN CHANNEL */
-function openChannel(c) {
-  currentYT = c.yt;
-  currentKick = c.kick;
-  loadAll();
-}
 
-/* LOAD */
-function loadAll() {
+/* 💥 ANA FIX: STABLE LIVE SYSTEM */
+async function openChannel(c) {
+
+  // 🎥 LIVE STREAM (her zaman güncel video)
   document.getElementById("ytFrame").src =
-    `https://www.youtube.com/live_chat?v=${currentYT}&embed_domain=${location.hostname}`;
+    `https://www.youtube.com/embed/live_stream?channel=${c.channelId}`;
 
+  // 💬 LIVE CHAT için gerçek aktif video çek
+  let liveID = await getLiveVideoId(c.channelId);
+
+  if (liveID) {
+    document.getElementById("ytFrame").src =
+      `https://www.youtube.com/live_chat?v=${liveID}&embed_domain=${window.location.hostname}`;
+  }
+
+  // 🎮 Kick
   document.getElementById("kickFrame").src =
-    `https://kick.com/popout/${currentKick}/chat`;
-
-  document.getElementById("videoFrame").src =
-    `https://www.youtube.com/embed/${currentYT}`;
-
-  checkLive();
+    `https://kick.com/popout/${c.kick}/chat`;
 }
 
-/* LIVE CHECK (basic) */
-function checkLive() {
-  const badge = document.getElementById("liveBadge");
 
-  if (currentYT) {
-    badge.innerText = "🔴 LIVE";
-    badge.style.background = "red";
-  } else {
-    badge.innerText = "OFFLINE";
-    badge.style.background = "gray";
+/* 🔍 CANLI VIDEO BULUCU (EN KRİTİK KISIM) */
+async function getLiveVideoId(channelId) {
+  try {
+    let res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
+    let text = await res.text();
+
+    let match = text.match(/videoId>([a-zA-Z0-9_-]{11})</);
+
+    return match ? match[1] : null;
+
+  } catch (e) {
+    return null;
   }
 }
 
-/* INPUT */
-function start() {
+
+/* MANUEL INPUT */
+async function start() {
+
   let yt = document.getElementById("yt").value.trim();
   let kick = document.getElementById("kick").value.trim();
 
+  if (!yt || !kick) {
+    alert("⚠️ İkisini de gir!");
+    return;
+  }
+
   let ytID = extractID(yt);
-  if (!ytID) return alert("YT ID yok");
 
-  currentYT = ytID;
-  currentKick = kick;
+  if (!ytID) {
+    alert("❌ YouTube ID bulunamadı!");
+    return;
+  }
 
-  loadAll();
+  // 🎥 live stream (fallback)
+  document.getElementById("ytFrame").src =
+    `https://www.youtube.com/embed/live_stream?channel=${ytID}`;
+
+  let liveID = await getLiveVideoId(ytID);
+
+  if (liveID) {
+    document.getElementById("ytFrame").src =
+      `https://www.youtube.com/live_chat?v=${liveID}&embed_domain=${window.location.hostname}`;
+  }
+
+  document.getElementById("kickFrame").src =
+    `https://kick.com/popout/${kick}/chat`;
 }
 
-/* SWIPE */
-let startX = 0;
 
-document.getElementById("chatContainer").addEventListener("touchstart", e => {
-  startX = e.touches[0].clientX;
-});
-
-document.getElementById("chatContainer").addEventListener("touchend", e => {
-  let endX = e.changedTouches[0].clientX;
-
-  if (startX - endX > 50) currentIndex++;
-  if (endX - startX > 50) currentIndex--;
-
-  currentIndex = Math.max(0, Math.min(1, currentIndex));
-
-  document.querySelectorAll(".chat").forEach((el, i) => {
-    el.style.transform = `translateX(-${currentIndex * 100}%)`;
-  });
-});
-
-/* YT ID */
+/* YT ID extractor */
 function extractID(url) {
   let m = url.match(/v=([a-zA-Z0-9_-]{11})/);
   if (m) return m[1];
@@ -278,6 +208,7 @@ function extractID(url) {
 
   return null;
 }
+
 </script>
 
 </body>
