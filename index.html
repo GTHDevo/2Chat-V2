@@ -323,6 +323,135 @@ document.getElementById("chatContainer").addEventListener("touchend", e => {
 });
 
 </script>
+<script>
 
+/* ================================
+   🔥 PATCH FIX SYSTEM (NO UI CHANGE)
+================================ */
+
+/* 1) SUPER STABLE LIVE DETECTOR */
+async function getLiveVideoId(channelId) {
+  try {
+
+    const res = await fetch(`https://www.youtube.com/channel/${channelId}/live`, {
+      redirect: "follow"
+    });
+
+    const url = res.url;
+
+    const match = url.match(/v=([a-zA-Z0-9_-]{11})/);
+
+    return match ? match[1] : null;
+
+  } catch (e) {
+    return null;
+  }
+}
+
+/* 2) OVERRIDE openChannel (fix chat bug) */
+const oldOpen = window.openChannel;
+
+window.openChannel = async function(c) {
+
+  if (oldOpen) oldOpen(c);
+
+  setTimeout(async () => {
+
+    let liveID = await getLiveVideoId(c.channelId);
+
+    const ytFrame = document.getElementById("ytFrame");
+
+    if (liveID) {
+      ytFrame.src =
+        `https://www.youtube.com/live_chat?v=${liveID}&embed_domain=${location.hostname}`;
+    } else {
+      ytFrame.src = "";
+    }
+
+  }, 1400);
+
+  fixKickMobile();
+};
+
+/* 3) INPUT FIX OVERRIDE */
+const oldStart = window.start;
+
+window.start = async function() {
+
+  if (oldStart) oldStart();
+
+  setTimeout(async () => {
+
+    let yt = document.getElementById("yt").value.trim();
+    let id = extractID(yt);
+
+    if (id) {
+      let liveID = await getLiveVideoId(id);
+
+      const ytFrame = document.getElementById("ytFrame");
+
+      if (liveID) {
+        ytFrame.src =
+          `https://www.youtube.com/live_chat?v=${liveID}&embed_domain=${location.hostname}`;
+      }
+    }
+
+    fixKickMobile();
+
+  }, 1400);
+};
+
+/* 4) MOBILE KICK FIX (IMPORTANT) */
+function fixKickMobile() {
+  const kick = document.getElementById("kickFrame");
+
+  if (!kick) return;
+
+  kick.style.minHeight = "300px";
+  kick.style.height = "100%";
+  kick.style.display = "block";
+}
+
+/* 5) MINI MODE BUTTON (NO UI CHANGE - AUTO ADD FLOAT BUTTON) */
+(function createMiniButton() {
+
+  const btn = document.createElement("button");
+
+  btn.innerText = "📺";
+  btn.style.position = "fixed";
+  btn.style.bottom = "20px";
+  btn.style.right = "20px";
+  btn.style.zIndex = "9999";
+  btn.style.padding = "10px";
+  btn.style.borderRadius = "50%";
+  btn.style.border = "none";
+  btn.style.background = "#ff2400";
+  btn.style.color = "white";
+  btn.style.boxShadow = "0 0 10px #ff2400";
+  btn.style.cursor = "pointer";
+
+  document.body.appendChild(btn);
+
+  let mini = false;
+
+  btn.onclick = () => {
+
+    mini = !mini;
+
+    const video = document.querySelector(".video");
+    const chats = document.querySelector(".chats");
+
+    if (mini) {
+      video.style.height = "20%";
+      chats.style.flex = "1.6";
+    } else {
+      video.style.height = "40%";
+      chats.style.flex = "1";
+    }
+  };
+
+})();
+
+</script>
 </body>
 </html>
