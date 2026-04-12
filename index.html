@@ -17,7 +17,7 @@ body {
   height: 100vh;
 }
 
-/* LEFT PANEL */
+/* LEFT */
 .left {
   width: 25%;
   background: #151515;
@@ -33,7 +33,7 @@ body {
   cursor: pointer;
 }
 
-/* RIGHT PANEL */
+/* RIGHT */
 .right {
   flex: 1;
   display: flex;
@@ -63,6 +63,7 @@ button {
   cursor: pointer;
 }
 
+/* PANELS */
 .chats {
   flex: 1;
   display: flex;
@@ -80,11 +81,13 @@ iframe {
 
 <div class="container">
 
+  <!-- LEFT -->
   <div class="left">
     <h3>🔥 Kanallar</h3>
     <div id="list"></div>
   </div>
 
+  <!-- RIGHT -->
   <div class="right">
 
     <div class="top">
@@ -94,7 +97,8 @@ iframe {
     </div>
 
     <div class="chats">
-      <iframe id="ytFrame"></iframe>
+      <iframe id="ytVideo"></iframe>
+      <iframe id="ytChat"></iframe>
       <iframe id="kickFrame"></iframe>
     </div>
 
@@ -113,7 +117,7 @@ const channels = [
   }
 ];
 
-/* LEFT PANEL */
+/* LIST */
 const list = document.getElementById("list");
 
 channels.forEach(c => {
@@ -127,28 +131,31 @@ channels.forEach(c => {
 });
 
 
-/* 💥 ANA FIX: STABLE LIVE SYSTEM */
+/* 💥 STABLE OPEN */
 async function openChannel(c) {
 
-  // 🎥 LIVE STREAM (her zaman güncel video)
-  document.getElementById("ytFrame").src =
+  // 🎥 VIDEO
+  document.getElementById("ytVideo").src =
     `https://www.youtube.com/embed/live_stream?channel=${c.channelId}`;
 
-  // 💬 LIVE CHAT için gerçek aktif video çek
+  // 🔍 LIVE ID
   let liveID = await getLiveVideoId(c.channelId);
 
   if (liveID) {
-    document.getElementById("ytFrame").src =
+    // 💬 CHAT (SEPARATE IFRAME)
+    document.getElementById("ytChat").src =
       `https://www.youtube.com/live_chat?v=${liveID}&embed_domain=${window.location.hostname}`;
+  } else {
+    document.getElementById("ytChat").src = "";
   }
 
-  // 🎮 Kick
+  // 🎮 KICK
   document.getElementById("kickFrame").src =
     `https://kick.com/popout/${c.kick}/chat`;
 }
 
 
-/* 🔍 CANLI VIDEO BULUCU (EN KRİTİK KISIM) */
+/* 🔍 LIVE DETECTOR */
 async function getLiveVideoId(channelId) {
   try {
     let res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
@@ -164,7 +171,7 @@ async function getLiveVideoId(channelId) {
 }
 
 
-/* MANUEL INPUT */
+/* MANUEL */
 async function start() {
 
   let yt = document.getElementById("yt").value.trim();
@@ -182,23 +189,27 @@ async function start() {
     return;
   }
 
-  // 🎥 live stream (fallback)
-  document.getElementById("ytFrame").src =
+  // 🎥 VIDEO
+  document.getElementById("ytVideo").src =
     `https://www.youtube.com/embed/live_stream?channel=${ytID}`;
 
+  // 💬 CHAT FIX
   let liveID = await getLiveVideoId(ytID);
 
   if (liveID) {
-    document.getElementById("ytFrame").src =
+    document.getElementById("ytChat").src =
       `https://www.youtube.com/live_chat?v=${liveID}&embed_domain=${window.location.hostname}`;
+  } else {
+    document.getElementById("ytChat").src = "";
   }
 
+  // 🎮 KICK
   document.getElementById("kickFrame").src =
     `https://kick.com/popout/${kick}/chat`;
 }
 
 
-/* YT ID extractor */
+/* YT ID */
 function extractID(url) {
   let m = url.match(/v=([a-zA-Z0-9_-]{11})/);
   if (m) return m[1];
