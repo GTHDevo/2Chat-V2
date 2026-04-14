@@ -1,2 +1,2 @@
-# Duble-chat-deneme-
-https://gthdevo.github.io/Duble-chat-deneme-/
+# 2Chat-V2-
+https://gthdevo.github.io/
